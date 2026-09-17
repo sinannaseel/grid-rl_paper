@@ -1,0 +1,1003 @@
+#LyX 2.4 created this file. For more info see https://www.lyx.org/
+\lyxformat 620
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass IEEEtran
+\begin_preamble
+% for subfigures/subtables
+\usepackage[caption=false,font=footnotesize]{subfig}
+\newcommand{\firstauthorname}{Naseel Sinan}
+\newcommand{\firstaffiliation}{\textit{Student Member, IEEE}}
+\newcommand{\secondauthorname}{Jongyun Kim}
+\newcommand{\secondaffiliation}{\textit{Member, IEEE}}
+\newcommand{\secondauthorname}{Pawel Ladowz}
+\newcommand{\secondaffiliation}{\textit{Member, IEEE}}
+
+\usepackage{iclr2026_conference,times}
+\usepackage{hyperref}
+\usepackage{url}
+
+% Uncomment the line below for camera-ready / final version
+% \iclrfinalcopy
+\end_preamble
+\options conference
+\use_default_options false
+\maintain_unincluded_children no
+\language english
+\language_package default
+\inputencoding auto-legacy-plain
+\fontencoding auto
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command bibtex
+\index_command default
+\float_placement tbh
+\float_alignment class
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_title "Your Title"
+\pdf_author "Your Name"
+\pdf_bookmarks true
+\pdf_bookmarksnumbered true
+\pdf_bookmarksopen true
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder true
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle false
+\pdf_quoted_options "pdfpagelayout=OneColumn, pdfnewwindow=true, pdfstartview=XYZ, plainpages=false"
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 0
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 0
+\use_package mhchem 1
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_formatted_ref 0
+\use_minted 0
+\use_lineno 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 2
+\papersides 1
+\paperpagestyle default
+\tablestyle default
+\tracking_changes false
+\output_changes false
+\change_bars false
+\postpone_fragile_content false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Rearrangement of puzzles using RL
+\end_layout
+
+\begin_layout Special Paper Notice
+
+\shape up
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+firstauthorname,~
+\backslash
+firstaffiliation,~
+\backslash
+secondauthorname,~
+\backslash
+secondaffiliation
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Abstract
+Teleoperation of manipulator robots allows operators in nuclear industry to perform dextrous manipulation inside constrained spaces such as a glovebox.
+ Often times the glovebox contain many items and limited space for manipulation to be carried out and further having deterred external visibility and fatigue due to long hours makes it a risk and requirement for autonomous operation.
+ Current methods for autonomous operation for rearrangement and constrained motion often fail due to brittle planning.
+ In this paper,
+ PriCT,
+ a Reinforcement Learning based method is introduced which provides tractable plan for cluttered scenarios in constrained space.
+ The method is evaluated with experiments and simulations in which the robot shows the replanning with minimal latency.
+ Simulation show the robust nature of the plan.
+ Experiments using a real robotic system show that the method can autonomously plan for any cluttered scenario.
+\end_layout
+
+\begin_layout Section
+Introduction
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Robots have provided safe operation in nuclear industry especially in gloveboxes that are contained environments for the safe handling of hazardous objects and materials,
+ moving away from direct human involvement to usage of teleoperation techniques via haptic device systems such as RrOBO 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "rrobo_2021"
+literal "false"
+
+\end_inset
+
+ and modern COTS robotic solutions 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ozan2021"
+literal "false"
+
+\end_inset
+
+.
+ These methods have been used in constrained workspaces to perform cleaning,
+ decommissioning and other manipulation tasks on legacy gloveboxes 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ozan2021"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+POCO 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "macpherson2016poco"
+literal "false"
+
+\end_inset
+
+ is the method of reducing the level of radioactive waste before decommissioning is performed.
+ In gloveboxes the objective is to remove items out by rearranging the clutter and removing the prioritized objects first.
+ This requires combined high level decision making in discrete space and motion verification in continuous space before a complete plan can be executed and problems such as these are solved using Task and motion planning.
+ 
+\end_layout
+
+\begin_layout Standard
+The scenario deals with many objects that requires task planning to account for large scale decision making and further motion planning needs to avoid failures in confined spaces,
+ as the pose decided by task plan are in task space coordinates and joint space control inputs are obtained using a kinematic control law,
+ based on the robot differential kinematics 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "siciliano2009robotics"
+literal "false"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+An increase in safety and a reduction in mental load can be achieved through a robust task and motion planner,
+ In recent years extensive work has been done on developing various methods for TAMP of which an in-depth survey was presented by Zhao 
+\shape italic
+et al.
+
+\shape default
+ and Caelan 
+\shape italic
+et al.
+\shape default
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Zhao_2025,garrett2021integrated"
+literal "false"
+
+\end_inset
+
+.
+ In the literature it is seen that task planning is a bottleneck and doesn't scale well given a large amount of objects and further the non monotonous rearrangement instances in the clutter creates difficulty as this creates dependency constraints which requires some objects to move away and create space before an object can be placed,
+ this is further subject to object size and shape that is an NP-hard problem 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "reif1994motion,ren2024multistage,wang2022efficient,wilfong1988motion"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+In this paper,
+ we propose a Reinforcement learning based approach to TAMP that solves prehensile non-monotone object rearrangement planning problems in confined spaces with higher success rate and fewer steps and less distance travelled than any existing methods.
+\end_layout
+
+\begin_layout Section
+Related Work
+\end_layout
+
+\begin_layout Standard
+Non monotonous rearrangement of obstacle is considered to be an NP hard problem and is often seen frequently in the field of Navigation Among Movable Obstacles (NAMO) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "chen1990practical,stilman2005navigation"
+literal "false"
+
+\end_inset
+
+ and Task and Motion Planning (TAMP) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "garrett2021integrated,srivastava2014combined"
+literal "false"
+
+\end_inset
+
+.
+ Current method perform the planning on tabletop environments utilizing tree search with modified growing strategies or search hierarchy followed by backtracking 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "krontiris2016efficiently,havur2014geometric,gao2022fast,liu2022structformer,curtis2022long,goodwin2022semantically"
+literal "false"
+
+\end_inset
+
+.
+ For a cluttered and confined scenario it is much harder considering placement dependency created when multiple objects occupy the space of one,
+ in these cases classical methods are limited in terms of scale of number of objects although providing optimal solutions for smaller pool they need to also factor in dependency and viability of motion plans.
+ Smarter heuristics can be created unique to problem statements although a generic version will require understanding of larger context and also dependency factor.
+\end_layout
+
+\begin_layout Standard
+In recent years using Transformer architecture with reinforcement learning methods has provided with better understanding of large scale context 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "agarwal2023transformers"
+literal "false"
+
+\end_inset
+
+.
+ Some methods have been developed for solving combinatorially expensive methods which can scale well,
+ like the Traveling Salesman Problem (TSP).
+ There have been implementations of introducing learning algorithms for Task and motion planning to qualitatively analyze long horizons.
+ 
+\end_layout
+
+\begin_layout Standard
+A separate line of work removes the search altogether by learning a policy that outputs a solution directly.
+ Kool et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "kool2019attention"
+literal "false"
+
+\end_inset
+
+ apply an attention-based encoder-decoder trained with REINFORCE and a rollout baseline to solve routing problems such as the Traveling Salesman Problem,
+ producing near-optimal tours in a single forward pass at inference.
+ POMO 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "kwon2020pomo"
+literal "false"
+
+\end_inset
+
+ improves on this by exploiting problem symmetry to sample multiple trajectories from different starting points per instance,
+ giving a lower-variance baseline than the rollout baseline used previously and improving training stability.
+ Luo et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "luo2023lehd"
+literal "false"
+
+\end_inset
+
+ show that generalization to instance sizes far beyond training is governed less by encoder depth and more by decoder capacity,
+ proposing a light-encoder heavy-decoder architecture that re-attends over the remaining candidate set at every decoding step,
+ and report near-optimal solutions on routing instances an order of magnitude larger than seen during training.
+ None of these methods,
+ however,
+ model geometric or kinematic feasibility,
+ their action space assumes every candidate move is executable,
+ which does not hold in a confined manipulation setting where a pick or place can fail due to grasp clearance,
+ occupied targets,
+ or ordering constraints.
+\end_layout
+
+\begin_layout Standard
+Task and motion planning algorithms which are generic are PDDLStream and COAST that use symbolic planning and classical methods and further their extenstions are done using Learned methods.
+ Ren et al.
+ decouple non-monotone rearrangement in confined spaces into an object-stage topology solved with a multi-stage Monte Carlo Tree Search,
+ reporting a 100% success rate on hard instances of seven to eight objects with real-world deployment,
+ which represents the current object-count ceiling reported for this exact problem setting.
+ Kulshrestha and Qureshi 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "kulshrestha2023scl"
+literal "false"
+
+\end_inset
+
+ use graph attention to capture structural dependency hierarchies in rearrangement,
+ allowing generalization to scenes with an arbitrary number of objects,
+ though their setting is tabletop rather than confined and does not encode a single-access-point geometry.
+\end_layout
+
+\begin_layout Standard
+The literature splits along one axis,
+ methods that reason about geometric and motion-level feasibility do so through repeated search whose cost is either unbounded or re-incurred per instance,
+ while methods that amortise inference into a trained policy do not model feasibility at all,
+ treating every action as unconditionally valid.
+ We are not aware of a method that combines an amortised,
+ search-free task planner with a feasibility signal that is learned rather than discovered anew by search at every instance,
+ which is the gap this paper addresses 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "chen2026robotic"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Problem formulation
+\end_layout
+
+\begin_layout Standard
+Let the workspace be a bounded region,
+ 
+\begin_inset Formula $\mathcal{W}\subset\mathbb{R}^{3}$
+\end_inset
+
+ and the floor plane,
+ 
+\begin_inset Formula $\mathcal{W}_{\text{floor}}=\{(x,y,z)\in\mathcal{W}:z=0\}$
+\end_inset
+
+ is discretized into equally spaced grid slots,
+ 
+\begin_inset Formula $\mathcal{X}\triangleq\{(r,c):r,c\in\mathbb{N}\}$
+\end_inset
+
+ and 
+\begin_inset Formula $n$
+\end_inset
+
+ identical objects of 
+\begin_inset Formula $2\times2$
+\end_inset
+
+ size and is based on the kernel settings shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "fig:kernel"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+ and is defined as 
+\begin_inset Formula $\mathcal{X}\triangleq\{((r,c),\theta_{n}):r,c\in N,\theta_{n}\in\{0,\frac{\pi}{2},\pi,\frac{3\pi}{2}\}\}$
+\end_inset
+
+ and the objects are denoted as 
+\begin_inset Formula $\mathcal{O}=\{o_{1},\dots,o_{n}\}$
+\end_inset
+
+,
+ all of which are known a priori.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename Images/problem_formulation/kernal.pdf
+	width 42page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+kernel 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:kernel"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The objective is to find rearrangement sequence 
+\begin_inset Formula $\boldsymbol{\pi}_{\text{symbolic}}=(\pi_{1},\dots,\pi_{T})$
+\end_inset
+
+ as task plan for the the objects in 
+\begin_inset Formula $\mathcal{O}$
+\end_inset
+
+,
+ such that an initial state 
+\begin_inset Formula $s_{\text{initial}}=\{((r_{1},c_{1}),\theta_{1}),\dots,((r_{n},c_{n}),\theta_{n})\}$
+\end_inset
+
+ can reach the final state 
+\begin_inset Formula $s_{\text{final}}=\{((r_{1},c_{1}),\theta_{1}),\dots,((r_{n},c_{n}),\theta_{n})\}$
+\end_inset
+
+ using a manipulator arm of joint space 
+\begin_inset Formula $q\in\mathbb{R}^{m}$
+\end_inset
+
+ such that 
+\begin_inset Formula $m$
+\end_inset
+
+ is the number of joints and the manipulator is velocity controlled at fixed sampling rate 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+ Objects are static unless acted upon,
+ and all interactions are quasi-static,
+ so that object dynamics can be neglected and the poses for the objects are present in 
+\begin_inset Formula $s_{\text{geom}}=\{\boldsymbol{t}_{(r,c)}\in\mathbb{R}^{3}:(r,c)\in\mathcal{X}\}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Section
+Mathematical background
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset include
+LatexCommand input
+filename "macros_optimization.lyx"
+literal "false"
+
+\end_inset
+
+
+\begin_inset CommandInset include
+LatexCommand input
+filename "macros.lyx"
+literal "false"
+
+\end_inset
+
+
+\begin_inset CommandInset include
+LatexCommand input
+filename "macros_dq.lyx"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+\lang british
+Constrained kinematic controller
+\end_layout
+
+\begin_layout Standard
+
+\lang british
+Once the plan 
+\begin_inset Formula $(\pi_{\text{geom}},\mathcal{Y})$
+\end_inset
+
+ is successfully certified,
+ the trajectory is executed using constrained kinematic controller.
+ Considering a generalised vector of 
+\begin_inset Formula $m_{\text{task}}\in\mathbb{N}$
+\end_inset
+
+ desired task variable 
+\begin_inset Formula $\boldsymbol{x}_{d}\in\mathbb{R}^{m_{\text{task}}}$
+\end_inset
+
+,
+ and the task error 
+\begin_inset Formula $\tilde{\boldsymbol{x}}\triangleq\boldsymbol{x}-\boldsymbol{x}_{d}$
+\end_inset
+
+,
+ this specific manipulation domain focuses strictly on end-effector translation control,
+ and so 
+\begin_inset Formula $\boldsymbol{x}\triangleq\boldsymbol{t}(\boldsymbol{q})\in\mathbb{R}^{3}$
+\end_inset
+
+,
+ the desired target variable is 
+\begin_inset Formula $\boldsymbol{x}_{d}\triangleq\boldsymbol{t}_{d}\in\mathbb{R}^{3}$
+\end_inset
+
+,
+ and the task tracking error is given by 
+\begin_inset Formula $\tilde{\boldsymbol{x}}\triangleq\boldsymbol{t}(\boldsymbol{q})-\boldsymbol{t}_{d}$
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "quiroz2019whole,marinho2019dynamic"
+literal "false"
+
+\end_inset
+
+.
+ The control input 
+\begin_inset Formula $\boldsymbol{u}$
+\end_inset
+
+ is obtained from the following optimisation problem
+\begin_inset Formula 
+\begin{equation}
+\argminimone{\boldsymbol{u}\in}{\dot{\boldsymbol{q}}}{\|\boldsymbol{J}\dot{\boldsymbol{q}}+\eta\tilde{\boldsymbol{x}}\|_{2}^{2}+\lambda\|\dot{\boldsymbol{q}}\|_{2}^{2}}{\boldsymbol{W}\dot{\boldsymbol{q}}\ensuremath{\preceq}\boldsymbol{w},}\label{eq:kinematic-controller}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $\boldsymbol{J}\in\mathbb{R}^{3\times n}$
+\end_inset
+
+ is the task Jacobian,
+ 
+\begin_inset Formula $\boldsymbol{q}\in\mathbb{R}^{n}$
+\end_inset
+
+ is the joint configuration vector of 
+\begin_inset Formula $n\in\mathbb{N}$
+\end_inset
+
+ joints,
+ 
+\begin_inset Formula $\eta\in(0,\infty)$
+\end_inset
+
+ is the proportional gain determining the convergence rate of the closed-loop error,
+ and 
+\begin_inset Formula $\lambda\in(0,\infty)$
+\end_inset
+
+ is a damping factor penalising high joint velocities.
+ Additionally,
+ 
+\begin_inset Formula $\boldsymbol{W}\in\mathbb{R}^{p\times n}$
+\end_inset
+
+ is the constraint matrix with 
+\begin_inset Formula $\boldsymbol{w}\triangleq\boldsymbol{w}(q)\in\mathbb{R}^{p}$
+\end_inset
+
+ enforces 
+\begin_inset Formula $p$
+\end_inset
+
+ linear constraints on the control inputs,
+ which are used to prevent joint limit violations and collisions via the Vector Field Inequalities framework 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "marinho2019dynamic"
+literal "false"
+
+\end_inset
+
+.
+ These require the definition of distance functions between collidable entities and the corresponding distance Jacobians,
+ enabling the robot to avoid restricted regions or remain safely within them.
+ 
+\end_layout
+
+\begin_layout Subsection
+
+\lang british
+Reinforcement Learning attention transformer
+\end_layout
+
+\begin_layout Standard
+
+\lang british
+Not sure yet if this is needed.
+\end_layout
+
+\begin_layout Section
+Methodology
+\end_layout
+
+\begin_layout Standard
+This section formally introduces the proposed RL based TAMP method and related modules in detail.
+ The idea is to generate a symbolic task plan using the reinforcement learning algorithm which is a learned heuristic for inference time results.
+\end_layout
+
+\begin_layout Subsection
+Task ordering as a Markov decision Process
+\end_layout
+
+\begin_layout Standard
+The rearrangement problem is modeled as an MDP,
+ 
+\begin_inset Formula $\mathcal{M}\triangleq(S_{MDP},\mathcal{A}_{MDP},P,\mathcal{R})$
+\end_inset
+
+ such that a state is 
+\begin_inset Formula $s_{t_{\text{step}}}=((r,c)_{1,t_{\text{step}}},\dots,(r,c)_{i,t_{\text{step}}})$
+\end_inset
+
+,
+ an action 
+\begin_inset Formula $\pi_{t_{\text{step}}}=((r,c)_{\text{occupied},t_{\text{step}}},(r,c)_{\text{clear},t_{\text{step}}}).$
+\end_inset
+
+ A reward function is 
+\begin_inset Formula $\rho_{t_{\text{step}}}=\begin{cases}
+1.0, & \text{if }(r,c)_{t_{\text{step}}}=(r,c)_{\text{goal},i}\in s_{T_{\text{goal}}},\\
+-0.05 & \text{otherwise,}
+\end{cases}$
+\end_inset
+
+ such that 
+\begin_inset Formula $\mathcal{R}(\tau)=\sum_{t_{\text{step}}=1}^{T}\rho_{t_{\text{step}}}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The architecture is an encoder decoder model which generates the sequence based on the initial configuration.
+ Training is done for 200,000 epochs over for grid sizes varying in the rage of 
+\begin_inset Formula $3\times3-8\times8$
+\end_inset
+
+.
+ The MDP is defined by a stochastic policy 
+\begin_inset Formula $p(\boldsymbol{\pi}_{\text{symbolic}}|s_{0},s_{T_{\text{goal}}}).$
+\end_inset
+
+ It is factorized and parametrized by 
+\begin_inset Formula $\theta$
+\end_inset
+
+ as 
+\begin_inset Formula $p_{\theta}(\boldsymbol{\pi}_{\text{symbolic}}|s_{0},s_{T})=\prod_{t=1}^{n}p_{\boldsymbol{\theta}}(\pi_{t_{\text{step}}}|\boldsymbol{s}_{0},s_{T},\boldsymbol{\pi}_{\text{symbolic\ensuremath{,1:t_{\text{step}}-1}}})$
+\end_inset
+
+ with gradient 
+\begin_inset Formula $\nabla\mathcal{L}(\theta|s_{0},s_{T})=-\mathbb{E}_{p_{\boldsymbol{\theta}}(\boldsymbol{\pi}_{\text{symbolic}}|s_{0},s_{T})}[(\mathcal{R}(\boldsymbol{\pi}_{\text{symbolic}})-b(s_{0},s_{T}))\nabla\text{log}p_{\theta}(\boldsymbol{\pi}_{\text{symbolic}}|s_{0},s_{T})].$
+\end_inset
+
+ it uses Kools method on TSP which works for this case as well.
+ A good baseline 
+\begin_inset Formula $b(s_{0},s_{T_{\text{goal}}})$
+\end_inset
+
+ reduces gradient variance and therefore increases learning speed.
+ The baseline network receives no gradient updates and is the frozen copy of the policy evaluated on the same problem instances,
+ its parameters are periodically hard-copied from 
+\begin_inset Formula $\theta$
+\end_inset
+
+ only when one-sided paired 
+\begin_inset Formula $t$
+\end_inset
+
+-test over a rolling window of evaluation such that the active policy's mean reward (
+\begin_inset Formula $\mu_{\text{policy}}$
+\end_inset
+
+) is less than or equal to the baseline policy's mean reward (
+\begin_inset Formula $\mu_{\text{baseline}}$
+\end_inset
+
+) weights are updated to match the current policy if this condition is statistically rejected,
+ indicated by a calculated test statistic 
+\begin_inset Formula $t_{\text{stat}}>0$
+\end_inset
+
+ and a 
+\begin_inset Formula $p_{\text{stat}}$
+\end_inset
+
+-value satisfying 
+\begin_inset Formula $p_{\text{stat}}<\alpha_{\text{stat}}=0.05$
+\end_inset
+
+.
+ This statistical checkpoint prevents the baseline from chasing sampling noise during periods of stochastic training fluctuations,
+ ensuring that each baseline promotion represents a genuine,
+ reproducible strategy improvement.
+\end_layout
+
+\begin_layout Subsection
+Task and motion planning
+\end_layout
+
+\begin_layout Standard
+The method uses PDDLStreams Adaptive 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "garrett2018stripstream"
+literal "false"
+
+\end_inset
+
+ evaluation method for selection of pose,
+ grasp,
+ and trajectories.
+ Although valid trajectories are evaluated using a reactive controller with environment modeled using VFI 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "marinho2019dynamic"
+literal "false"
+
+\end_inset
+
+.
+ Further the inference time replanning requires failure instances to provide a successful completion of task plan
+\end_layout
+
+\begin_layout Standard
+This is the method of how penalty is provided to replan.
+ The penalty are given for the following:
+ Grasp failure,
+ Sequence failure,
+ location constraint
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename Images/methodology/high-level-flowchart.pdf
+	width 42page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Flowchart of algorithm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+
+\lang british
+Inference time action masking
+\end_layout
+
+\begin_layout Standard
+
+\lang british
+Geometric and kinematic failures are not handled by an online reward loop,
+ they are recorded in a set of failures 
+\begin_inset Formula $\mathcal{F}^{(k)}$
+\end_inset
+
+.
+ Before an action 
+\begin_inset Formula $\pi_{t_{\text{step}}}\in\mathcal{A}$
+\end_inset
+
+ is sampled by the policy combines these constraints with the task planner.
+ The masking layer sets the probability of all invalid actions at specific MDP state 
+\begin_inset Formula $\boldsymbol{s}_{t}$
+\end_inset
+
+ to zero and renormalises the remaining distribution
+\begin_inset Formula 
+\begin{equation}
+p_{\theta,\text{masked}}(\pi_{t_{\text{step}}}\mid s_{t_{\text{step}}})=\begin{cases}
+0, & \text{if }\pi_{t_{\text{step}}}\in\mathcal{F}^{(k)},\\
+\dfrac{p_{\theta}(\pi_{t_{\text{step}}}\mid s_{t_{\text{step}}})}{\sum_{\pi_{t_{\text{step}}}\notin\mathcal{F}^{(k)}}p_{\theta}(\pi_{t_{\text{step}}}\mid s_{t_{\text{step}}})} & \text{otherwise}.
+\end{cases}\label{eq:inference-masking}
+\end{equation}
+
+\end_inset
+
+Executing the masked policy until the goal is reached produces the task plan,
+ that is the sequence of actions denoted 
+\begin_inset Formula $\mathscr{\pi}_{\text{symbolic}}$
+\end_inset
+
+ such that
+\begin_inset Formula 
+\begin{equation}
+\boldsymbol{\pi}_{\text{symbolic}}=(\pi_{1},\dots,\pi_{t_{\text{step}}})\label{eq:renewed-taskplan}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Experimentation
+\end_layout
+
+\begin_layout Subsection
+Simulation Setup
+\end_layout
+
+\begin_layout Standard
+We create a purely 2D implementation on a smaller grid to see the algorithm work with each object occupying a single grid,
+ further the secondary 2D implementation is subject to dependency constraint with kernel implementation each box occupying 4 grid spaces.
+\end_layout
+
+\begin_layout Subsection
+Simulation Results
+\end_layout
+
+\begin_layout Standard
+Here on the 2D implementation we compare with other algorithm of tamp
+\end_layout
+
+\begin_layout Subsection
+Physical Setup
+\end_layout
+
+\begin_layout Standard
+Here we use UR3e a 6 DoF robotic manipulator to pick and place objects in a confined environment,
+ using SAS as a driver and also Coppelia simulation to visualize the movements in a simulation.
+\end_layout
+
+\begin_layout Section
+Conclusions
+\end_layout
+
+\begin_layout Standard
+The contribution is inference time failure mechanism and RL for scaled task planning.
+\end_layout
+
+\begin_layout Standard
+claim :
+ Learned rearrangement policies scale where search-based planners don't,
+ but occasionally deadlock;
+ we fix that at inference,
+ without retraining,
+ by tracing failures back to their root cause.
+\end_layout
+
+\begin_layout Standard
+{
+\begin_inset Formula $N\le(R\times C)-1$
+\end_inset
+
+ cant verify a solution ??
+ need to see this,
+ this was for single grid now it is multiple grid}.
+\lang british
+This guarantees the existence of at least one empty buffer slot,
+ so that a rearrangement solution remains topologically possible
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "references"
+options "template/iclr2026_conference"
+encoding "default"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
